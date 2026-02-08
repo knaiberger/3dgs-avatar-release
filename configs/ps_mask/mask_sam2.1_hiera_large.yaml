@@ -1,0 +1,4 @@
+# @package _global_
+mask_name: mask_sam2.1_hiera_large
+dataset:
+  mask_path: mask_sam2.1_hiera_large

@@ -1,0 +1,4 @@
+# @package _global_
+smpl_model_name: camerahmr_first_foreground_undistorted
+dataset:
+   smpl_model_path: camerahmr_first_foreground_undistorted

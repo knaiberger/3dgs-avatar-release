@@ -1,0 +1,4 @@
+# @package _global_
+smpl_model_name: animnerf_models
+dataset:
+  smpl_model_path: animnerf_models

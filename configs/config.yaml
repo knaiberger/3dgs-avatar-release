@@ -7,6 +7,9 @@ defaults:
   - non_rigid: hashgrid
   - option:
       - iter15k
+  - ps_mask: mask
+  - ps_smpl: animnerf_models
+  - ps_camera: camera
 
 hydra:
   run:
@@ -14,7 +17,7 @@ hydra:
   job:
     chdir: false
 
-name: ${dataset_name}-${pose_name}-${rigid_name}-${non_rigid_name}-${texture_name}-${tag}
+name: ${dataset_name}-${pose_name}-${rigid_name}-${non_rigid_name}-${texture_name}-${tag}-${camera_name}-${smpl_model_name}-${mask_name}
 tag: default
 
 model:
@@ -31,6 +34,7 @@ model:
       name: identity
 
 dataset:
+  mask_bool: true
   preload: true
   train_smpl: false
 
@@ -101,7 +105,7 @@ save_iterations: [30000]
 seed: -1
 checkpoint_iterations: []
 start_checkpoint: null
-wandb_disable: false
+wandb_disable: true
 
 mode: train
 load_ckpt: null

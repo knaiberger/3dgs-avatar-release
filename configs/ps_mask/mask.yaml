@@ -1,0 +1,4 @@
+# @package _global_
+mask_name: mask
+dataset:
+  mask_path: mask

@@ -61,7 +61,7 @@ def training(config):
     # define lpips
     lpips_type = config.opt.get('lpips_type', 'vgg')
     loss_fn_vgg = lpips.LPIPS(net=lpips_type).cuda() # for training
-    evaluator = PSEvaluator() if dataset.name == 'people_snapshot' else Evaluator()
+    evaluator = PSEvaluator() if dataset.name == 'people_snapshot' or 'people_snapshot_multiple' or 'people_snapshot_mix' else Evaluator()
 
     first_iter = 0
     gaussians = GaussianModel(model.gaussian)

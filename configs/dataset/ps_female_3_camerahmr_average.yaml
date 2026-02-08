@@ -1,11 +1,13 @@
 # @package _global_
 
-dataset_name: ps_female_3
+dataset_name: ps_female_3_camerahmr_average
 
 dataset:
   name: people_snapshot
   root_dir: "../../data/peoplesnapshot_arah-format/people_snapshot_public"
   subject: female-3-casual
+  camera_name: camerahmr_average.pkl
+  smpl_model_path: camerahmr_average
 
   train_frames: [ 0, 446, 4 ]
   val_frames: [ 446, 447, 4 ]
@@ -22,7 +24,6 @@ dataset:
   white_background: false
   data_device: cuda
   eval: false
-  mask_dist: true
 
 opt:
   densify_grad_threshold: 0.0001

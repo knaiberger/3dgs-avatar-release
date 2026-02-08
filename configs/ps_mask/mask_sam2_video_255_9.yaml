@@ -1,0 +1,5 @@
+# @package _global_
+mask_name: mask_sam2_video_255_9
+dataset:
+  mask_path: mask_sam2_video_255_9
+  mask_dist: false

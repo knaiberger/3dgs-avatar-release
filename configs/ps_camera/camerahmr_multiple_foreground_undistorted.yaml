@@ -1,0 +1,4 @@
+# @package _global_
+camera_name: camerahmr_multiple_foreground_undistorted
+dataset:
+   camera_type: camerahmr_multiple_foreground_undistorted_no_arah/camerahmr_multiple_foreground_undistorted

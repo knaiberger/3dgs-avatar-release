@@ -1,0 +1,4 @@
+# @package _global_
+camera_name: camera
+dataset:
+  camera_type: camera.pkl

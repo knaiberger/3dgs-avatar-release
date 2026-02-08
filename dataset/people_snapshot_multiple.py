@@ -14,9 +14,9 @@ from torch.utils.data import Dataset
 from scipy.spatial.transform import Rotation
 import trimesh
 
-class PeopleSnapshotDataset(Dataset):
+class PeopleSnapshotMultipleDataset(Dataset):
     def __init__(self, cfg, split='train'):
-        print("-------------------normal-------------------")
+        print("-------------------multiple-------------------")
         super().__init__()
         self.cfg = cfg
         self.split = split
@@ -27,7 +27,8 @@ class PeopleSnapshotDataset(Dataset):
         self.val_frames = cfg.val_frames
         self.white_bg = cfg.white_background
 
-        with open(os.path.join(self.root_dir, self.subject, self.cfg.camera_type), 'rb') as f:
+
+        with open(os.path.join(self.root_dir, self.subject, 'camera.pkl'), 'rb') as f:
             camera = pkl.load(f, encoding='latin1')
 
         self.K, self.R, self.T, self.D = self.get_KRTD(camera)
@@ -57,6 +58,7 @@ class PeopleSnapshotDataset(Dataset):
         cam_name = '1'
 
         subject_dir = os.path.join(self.root_dir, self.subject)
+        #TODO: predict is not working
         if split == 'predict':
             predict_seqs = ['rotating_models',
                             'gLO_sBM_cAll_d14_mLO1_ch05_view1']
@@ -73,21 +75,19 @@ class PeopleSnapshotDataset(Dataset):
         else:
             frames = list(range(start_frame, end_frame, sampling_rate))
             frame_slice = slice(start_frame, end_frame, sampling_rate)
-            model_files = [os.path.join(subject_dir,self.cfg.smpl_model_path, f'{frame:06d}.npz') for frame in frames]
+            model_files = [os.path.join(subject_dir, self.cfg.smpl_model_path, f'{frame:06d}.npz') for frame in frames]
+            camera_files = [os.path.join(subject_dir,self.cfg.camera_type ,f'{frame:06d}.pkl') for frame in frames]
             self.model_files = model_files
 
 
         self.data = []
         img_dir = os.path.join(subject_dir, 'image')
-        mask_dir = os.path.join(subject_dir, self.cfg.mask_path+"/")
+        mask_dir = os.path.join(subject_dir, self.cfg.mask_path)
         img_files = sorted(glob.glob(os.path.join(img_dir, '*.jpg')))
         mask_files = sorted(glob.glob(os.path.join(mask_dir, '*.png')))
         img_files = img_files[frame_slice]
         mask_files = mask_files[frame_slice]
-        print(mask_dir)
-        print(len(model_files))
-        print(len(img_files))
-        print(len(mask_files))
+
         if(cfg.mask_bool):
             assert len(model_files) == len(img_files) == len(mask_files)
         else:
@@ -114,7 +114,7 @@ class PeopleSnapshotDataset(Dataset):
                 img_file = img_files[d_idx]
                 mask_file = mask_files[d_idx]
                 model_file = model_files[d_idx]
-                
+                camera_file = camera_files[d_idx]
                 self.data.append({
                     'cam_idx': cam_idx,
                     'cam_name': cam_name,
@@ -123,6 +123,7 @@ class PeopleSnapshotDataset(Dataset):
                     'img_file': img_file,
                     'mask_file': mask_file,
                     'model_file': model_file,
+                    'camera_file': camera_file
                 })
 
         self.frames = frames
@@ -267,11 +268,16 @@ class PeopleSnapshotDataset(Dataset):
         img_file = data_dict['img_file']
         mask_file = data_dict['mask_file']
         model_file = data_dict['model_file']
+        camera_file = data_dict['camera_file']
 
-        K = self.K.copy()
-        dist = self.D.copy()
-        R = self.R.copy()
-        T = self.T.copy()
+        with open(camera_file, 'rb') as f:
+            camera = pkl.load(f, encoding='latin1')
+
+        K, R, T, dist = self.get_KRTD(camera)
+        #K = self.K.copy()
+        #dist = self.D.copy()
+        #R = self.R.copy()
+        #T = self.T.copy()
 
         # note that in ZJUMoCap the camera center does not align perfectly in the intrinsic
         # here we try to offset it by modifying the extrinsic...

@@ -14,9 +14,9 @@ from torch.utils.data import Dataset
 from scipy.spatial.transform import Rotation
 import trimesh
 
-class PeopleSnapshotDataset(Dataset):
+class PeopleSnapshotMixDataset(Dataset):
     def __init__(self, cfg, split='train'):
-        print("-------------------normal-------------------")
+        print("-------------------mixed-------------------")
         super().__init__()
         self.cfg = cfg
         self.split = split
@@ -26,13 +26,7 @@ class PeopleSnapshotDataset(Dataset):
         self.train_frames = cfg.train_frames
         self.val_frames = cfg.val_frames
         self.white_bg = cfg.white_background
-
-        with open(os.path.join(self.root_dir, self.subject, self.cfg.camera_type), 'rb') as f:
-            camera = pkl.load(f, encoding='latin1')
-
-        self.K, self.R, self.T, self.D = self.get_KRTD(camera)
-
-        self.H, self.W = camera['height'], camera['width']
+      
         self.h, self.w = cfg.img_hw
 
         self.faces = np.load('body_models/misc/faces.npz')['faces']
@@ -42,14 +36,26 @@ class PeopleSnapshotDataset(Dataset):
 
         if split == 'train':
             frames = self.train_frames
+            with open(os.path.join(self.root_dir, self.subject, self.cfg.camera_type_train), 'rb') as f:
+                camera = pkl.load(f, encoding='latin1')
         elif split == 'val':
             frames = self.val_frames
+            with open(os.path.join(self.root_dir, self.subject, self.cfg.camera_type_train), 'rb') as f:
+                camera = pkl.load(f, encoding='latin1')
         elif split == 'test':
+            print(self.cfg.test_mode)
             frames = self.cfg.test_frames[self.cfg.test_mode]
+            with open(os.path.join(self.root_dir, self.subject, self.cfg.camera_type_test), 'rb') as f:
+                camera = pkl.load(f, encoding='latin1')
         elif split == 'predict':
             frames = self.cfg.predict_frames
         else:
             raise ValueError
+
+
+        self.K, self.R, self.T, self.D = self.get_KRTD(camera)
+
+        self.H, self.W = camera['height'], camera['width']
 
         start_frame, end_frame, sampling_rate = frames
 
@@ -73,7 +79,10 @@ class PeopleSnapshotDataset(Dataset):
         else:
             frames = list(range(start_frame, end_frame, sampling_rate))
             frame_slice = slice(start_frame, end_frame, sampling_rate)
-            model_files = [os.path.join(subject_dir,self.cfg.smpl_model_path, f'{frame:06d}.npz') for frame in frames]
+            if split=='train' or split=='val':
+                model_files = [os.path.join(subject_dir,self.cfg.smpl_model_train_path, f'{frame:06d}.npz') for frame in frames]
+            elif split=='test':
+                model_files = [os.path.join(subject_dir,self.cfg.smpl_model_test_path, f'{frame:06d}.npz') for frame in frames]
             self.model_files = model_files
 
 
@@ -81,16 +90,22 @@ class PeopleSnapshotDataset(Dataset):
         img_dir = os.path.join(subject_dir, 'image')
         mask_dir = os.path.join(subject_dir, self.cfg.mask_path+"/")
         img_files = sorted(glob.glob(os.path.join(img_dir, '*.jpg')))
-        mask_files = sorted(glob.glob(os.path.join(mask_dir, '*.png')))
         img_files = img_files[frame_slice]
-        mask_files = mask_files[frame_slice]
         print(mask_dir)
         print(len(model_files))
         print(len(img_files))
-        print(len(mask_files))
-        if(cfg.mask_bool):
+        mask_files = ""
+        if(cfg.mask_bool_train and (split=='train' or split=='val')):
+            mask_files = sorted(glob.glob(os.path.join(mask_dir, '*.png')))
+            mask_files = mask_files[frame_slice]
             assert len(model_files) == len(img_files) == len(mask_files)
-        else:
+        elif(not cfg.mask_bool_train and (split=='train' or split=='val')):
+            assert len(model_files) == len(img_files)
+        elif(cfg.mask_bool_test and split=='test'):
+            mask_files = sorted(glob.glob(os.path.join(mask_dir, '*.png')))
+            mask_files = mask_files[frame_slice]
+            assert len(model_files) == len(img_files) == len(mask_files)
+        elif(not cfg.mask_bool_test and split=='test'):
             assert len(model_files) == len(img_files)
 
         if split == 'predict':
@@ -112,7 +127,10 @@ class PeopleSnapshotDataset(Dataset):
         else:
             for d_idx, f_idx in enumerate(frames):
                 img_file = img_files[d_idx]
-                mask_file = mask_files[d_idx]
+                if(mask_files==""):
+                    mask_file=""
+                else:
+                    mask_file = mask_files[d_idx]
                 model_file = model_files[d_idx]
                 
                 self.data.append({
@@ -287,7 +305,11 @@ class PeopleSnapshotDataset(Dataset):
         T = T[:, 0]
 
         image = cv2.cvtColor(cv2.imread(img_file), cv2.COLOR_BGR2RGB)
-        mask = cv2.imread(mask_file, cv2.IMREAD_GRAYSCALE)
+        if(mask_file==""):
+            w,h,l = image.shape
+            mask = np.zeros((w,h,1),dtype=np.uint8)
+        else:
+            mask = cv2.imread(mask_file, cv2.IMREAD_GRAYSCALE)
         image = cv2.undistort(image, K, dist, None)
         if(self.cfg.mask_dist):
             mask = cv2.undistort(mask, K, dist, None)

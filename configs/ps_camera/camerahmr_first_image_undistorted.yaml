@@ -1,0 +1,4 @@
+# @package _global_
+camera_name: camerahmr_first_image_undistorted
+dataset:
+   camera_type: camerahmr_first_image_undistorted_no_arah/camerahmr_first_image_undistorted.pkl

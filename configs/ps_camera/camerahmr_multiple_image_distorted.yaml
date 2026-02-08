@@ -1,0 +1,4 @@
+# @package _global_
+camera_name: camerahmr_multiple_image_distorted
+dataset:
+   camera_type: camerahmr_multiple_image_distorted_no_arah/camerahmr_multiple_image_distorted

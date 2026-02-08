@@ -1,0 +1,5 @@
+# @package _global_
+camera_name: camera_mix
+dataset:
+   camera_type_train: camerahmr_first_image_undistorted_no_arah/camerahmr_first_image_undistorted.pkl
+   camera_type_test: camera.pkl

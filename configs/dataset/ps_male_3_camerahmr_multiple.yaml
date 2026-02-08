@@ -1,11 +1,13 @@
 # @package _global_
 
-dataset_name: ps_male_3
+dataset_name: ps_male_3_camerahmr_multiple
 
 dataset:
-  name: people_snapshot
+  name: people_snapshot_multiple
   root_dir: "../../data/peoplesnapshot_arah-format/people_snapshot_public"
   subject: male-3-casual
+  camera_name: cameras
+  smpl_model_path: camerahmr_multiple
 
   train_frames: [ 0, 456, 4 ]
   val_frames: [ 456, 457, 4 ]
@@ -22,4 +24,3 @@ dataset:
   white_background: false
   data_device: cuda
   eval: false
-  mask_dist: true

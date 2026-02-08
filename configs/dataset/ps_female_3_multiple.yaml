@@ -1,9 +1,9 @@
 # @package _global_
 
-dataset_name: ps_female_3
+dataset_name: ps_female_3_multiple
 
 dataset:
-  name: people_snapshot
+  name: people_snapshot_multiple
   root_dir: "../../data/peoplesnapshot_arah-format/people_snapshot_public"
   subject: female-3-casual
 

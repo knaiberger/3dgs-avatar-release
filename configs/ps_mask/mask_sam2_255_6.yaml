@@ -1,0 +1,5 @@
+# @package _global_
+mask_name: mask_sam2_255_6
+dataset:
+  mask_path: mask_sam2_255_6
+  mask_dist: false

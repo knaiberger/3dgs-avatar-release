@@ -1,0 +1,4 @@
+# @package _global_
+camera_name: camerahmr_average_foreground_distorted
+dataset:
+   camera_type: camerahmr_average_foreground_distorted_no_arah/camerahmr_average_foreground_distorted.pkl

@@ -1,10 +1,10 @@
 # @package _global_
 
-dataset_name: ps_female_4
+dataset_name: ps_female_4_sathmr_mix
 
 dataset:
-  name: people_snapshot
-  root_dir: "../../data/peoplesnapshot_arah-format/people_snapshot_public"
+  name: people_snapshot_mix
+  root_dir: "../../data/peoplesnapshot_arah-format/people_snapshot_public/sat-hmr/"
   subject: female-4-casual
 
   train_frames: [ 0, 336, 4 ]

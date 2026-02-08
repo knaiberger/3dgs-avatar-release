@@ -1,0 +1,4 @@
+# @package _global_
+smpl_model_name: camera_sathmr
+dataset:
+  smpl_model_path: smpl

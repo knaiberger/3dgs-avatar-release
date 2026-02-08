@@ -25,6 +25,8 @@ from utils.general_utils import Evaluator, PSEvaluator
 import hydra
 from omegaconf import OmegaConf
 import wandb
+import time
+
 
 def predict(config):
     with torch.set_grad_enabled(False):
@@ -91,14 +93,20 @@ def test(config):
         iter_start = torch.cuda.Event(enable_timing=True)
         iter_end = torch.cuda.Event(enable_timing=True)
 
-        evaluator = PSEvaluator() if config.dataset.name == 'people_snapshot' else Evaluator()
+        evaluator = PSEvaluator() if config.dataset.name == 'people_snapshot' or 'people_snapshot_multiple' or 'people_snapshot_mix' else Evaluator()
 
         psnrs = []
         ssims = []
         lpipss = []
         times = []
+        start = time.time()
+        end = time.time()
         for idx in trange(len(scene.test_dataset), desc="Rendering progress"):
+            start = time.time()
             view = scene.test_dataset[idx]
+            #print(view.data)
+            end = time.time()
+            print(end-start)
             iter_start.record()
 
             render_pkg = render(view, config.opt.iterations, scene, config.pipeline, background,
@@ -130,6 +138,8 @@ def test(config):
                 ssims.append(torch.tensor([0.], device='cuda'))
                 lpipss.append(torch.tensor([0.], device='cuda'))
             times.append(elapsed)
+            
+            
 
         _psnr = torch.mean(torch.stack(psnrs))
         _ssim = torch.mean(torch.stack(ssims))
@@ -139,6 +149,7 @@ def test(config):
                    'metrics/ssim': _ssim,
                    'metrics/lpips': _lpips,
                    'metrics/time': _time})
+        print(os.path.join(config.exp_dir, config.suffix, 'results.npz'))
         np.savez(os.path.join(config.exp_dir, config.suffix, 'results.npz'),
                  psnr=_psnr.cpu().numpy(),
                  ssim=_ssim.cpu().numpy(),

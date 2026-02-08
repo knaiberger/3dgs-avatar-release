@@ -1,0 +1,5 @@
+# @package _global_
+mask_name: mask_MatAnyone_personal
+dataset:
+  mask_path: mask_MatAnyone_personal
+  mask_dist: false
